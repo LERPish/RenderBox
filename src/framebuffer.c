@@ -43,3 +43,32 @@ int DrawPixel(int x, int y, float z, unsigned int color) {
     }
     return 0;
 }
+
+void line(ScreenEdge e, unsigned int color) {
+    int x0 = e.v0.x;
+    int y0 = e.v0.y;
+    int x1 = e.v1.x;
+    int y1 = e.v1.y;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
+
+    while (1) {
+        int ret = DrawPixel(x0, y0, 0.5f, color);
+
+        if((x0 == x1 && y0 == y1) /*|| ret == 0*/) break;
+
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}

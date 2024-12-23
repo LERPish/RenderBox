@@ -51,9 +51,6 @@ Vertice cubeV[] = {
     (Vertice){.pos = {-0.5f,  0.5f,  0.5f}}
 };
 
-Edge cubeE[18]; 
-Face cubeF[12];
-
 Edge cubeE[] = {
     {0, 1}, {1, 2}, {2, 3}, {3, 0},  // Bottom edges
     {4, 5}, {5, 6}, {6, 7}, {7, 4},  // Top edges
@@ -62,7 +59,22 @@ Edge cubeE[] = {
     {0, 2}, {7, 5}
 };
 
-void InitializeCubeFaces() {
+Face cubeF[] = {
+    {0, 1, 2, {0, 0, 0}},
+    {0, 2, 3, {0, 0, 0}},
+    {4, 5, 6, {0, 0, 0}},
+    {4, 6, 7, {0, 0, 0}},
+    {0, 1, 5, {0, 0, 0}},
+    {0, 5, 4, {0, 0, 0}},
+    {2, 3, 7, {0, 0, 0}},
+    {2, 7, 6, {0, 0, 0}},
+    {1, 2, 6, {0, 0, 0}},
+    {1, 6, 5, {0, 0, 0}},
+    {3, 0, 4, {0, 0, 0}},
+    {3, 4, 7, {0, 0, 0}},
+};
+
+/*void InitializeCubeFaces() {
     cubeF[0] = (Face){&cubeV[0], &cubeV[1], &cubeV[2], {0, 0, 0}};
     cubeF[1] = (Face){&cubeV[0], &cubeV[2], &cubeV[3], {0, 0, 0}};
     cubeF[2] = (Face){&cubeV[4], &cubeV[5], &cubeV[6], {0, 0, 0}};
@@ -75,11 +87,10 @@ void InitializeCubeFaces() {
     cubeF[9] = (Face){&cubeV[1], &cubeV[6], &cubeV[5], {0, 0, 0}};
     cubeF[10] = (Face){&cubeV[3], &cubeV[0], &cubeV[4], {0, 0, 0}};
     cubeF[11] = (Face){&cubeV[3], &cubeV[4], &cubeV[7], {0, 0, 0}};
-}
+}*/
 
 int main(int argc, char *argv[]) {
     initSDL();
-    InitializeCubeFaces();
 
     Mesh *cMesh = CreateMesh((size_t)8, (size_t)18, (size_t)12);
     memcpy(cMesh->vertices, cubeV, sizeof(cubeV));
@@ -143,54 +154,20 @@ int main(int argc, char *argv[]) {
         printf("Object Scale:    (%.2f, %.2f, %.2f)\n", obj->scale.x, obj->scale.y, obj->scale.z);
 
         //printf("rendering\n");
+        RenderMeshWireframe(obj->transformedMesh, cam);
 
-        for (size_t x = 0; x < obj->mesh->edge_count; x++){
+        /*for (size_t x = 0; x < obj->mesh->edge_count; x++){
             Edge curCube = obj->transformedMesh->edges[x];
             Vec3 v0 = obj->transformedMesh->vertices[curCube.v0].pos;
             Vec3 v1 = obj->transformedMesh->vertices[curCube.v1].pos;
 
             ScreenEdge nSEdge = { ProjectVert(v0, cam), ProjectVert(v1, cam) };
 
-            /*printf("Edge %zu: v0 (%p), v1 (%p)\n", x, curCube.v0, curCube.v1);
-            printf("v0 pos: (%f, %f, %f), v1 pos: (%f, %f, %f)\n",
-                    curCube.v0->pos.x, curCube.v0->pos.y, curCube.v0->pos.z,
-                    curCube.v1->pos.x, curCube.v1->pos.y, curCube.v1->pos.z);*/
-
             line(nSEdge, 0xFFFFFFFF);
-        }
+        }*/
         //printf("finished the loop\n");
 
         RenderFramebuffer(&app);
     }
     return 0;
-}
-
-
-void line(ScreenEdge e, unsigned int color) {
-    int x0 = e.v0.x;
-    int y0 = e.v0.y;
-    int x1 = e.v1.x;
-    int y1 = e.v1.y;
-
-    int dx = abs(x1 - x0);
-    int dy = abs(y1 - y0);
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
-    int err = dx - dy;
-
-    while (1) {
-        int ret = DrawPixel(x0, y0, 0.5f, color);
-
-        if((x0 == x1 && y0 == y1) /*|| ret == 0*/) break;
-
-        int e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-        }
-    }
 }

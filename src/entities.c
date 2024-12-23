@@ -1,5 +1,8 @@
+#include "camera.h"
 #include "math_utils.h"
 #include "entities.h"
+#include "camera.h"
+#include "framebuffer.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,13 +73,6 @@ void AddEdgesToMesh(Mesh *mesh, Edge *edges) {
 
 void AddFacesToMesh(Mesh *mesh, Face *faces);
 
-/*void UpdateTransformedEdges(Mesh *transformedMesh, const Mesh *originalMesh) {
-    for (size_t i = 0; i < transformedMesh->edge_count; i++) {
-        transformedMesh->edges[i].v0 = &transformedMesh->vertices[originalMesh->edges[i].v0 - originalMesh->vertices];
-        transformedMesh->edges[i].v1 = &transformedMesh->vertices[originalMesh->edges[i].v1 - originalMesh->vertices];
-    }
-}*/
-
 Object3D *CreateObject3D(Mesh *mesh, Vec3 position, Vec3 eulerRotation, Vec3 scale) {
     Object3D *obj = malloc(sizeof(Object3D));
     if (!obj) {
@@ -95,9 +91,9 @@ Object3D *CreateObject3D(Mesh *mesh, Vec3 position, Vec3 eulerRotation, Vec3 sca
     }
 
     for (size_t i = 0; i < mesh->face_count; i++) {
-        obj->transformedMesh->faces[i].v0 = &obj->transformedMesh->vertices[mesh->faces[i].v0 - mesh->vertices];
-        obj->transformedMesh->faces[i].v1 = &obj->transformedMesh->vertices[mesh->faces[i].v1 - mesh->vertices];
-        obj->transformedMesh->faces[i].v2 = &obj->transformedMesh->vertices[mesh->faces[i].v2 - mesh->vertices];
+        obj->transformedMesh->faces[i].v0 = mesh->faces[i].v0;
+        obj->transformedMesh->faces[i].v1 = mesh->faces[i].v1;
+        obj->transformedMesh->faces[i].v2 = mesh->faces[i].v2;
     }
 
     obj->position = position;
@@ -144,4 +140,18 @@ void TransformObject3D(Object3D *obj) {
 }
 
 void RenderMesh(Mesh *mesh);
-void RenderMeshWireframe(Mesh *mesh);
+void RenderMeshWireframe(Mesh *mesh, Camera cam) {
+    for (size_t i = 0; i < mesh->face_count; i++) {
+        Vec2 v0 = ProjectVert(mesh->vertices[mesh->faces[i].v0].pos, cam);
+        Vec2 v1 = ProjectVert(mesh->vertices[mesh->faces[i].v1].pos, cam);
+        Vec2 v2 = ProjectVert(mesh->vertices[mesh->faces[i].v2].pos, cam);
+
+        ScreenEdge e0 = {v0,v1};
+        ScreenEdge e1 = {v1,v2};
+        ScreenEdge e2 = {v0,v2};
+
+        line(e0, 0xFFFFFFFF);
+        line(e1, 0xFFFFFFFF);
+        line(e2, 0xFFFFFFFF);
+    }
+}

@@ -2,6 +2,7 @@
 #define MATH_UTILS_H
 #include "defs.h"
 #include "stdlib.h"
+#include <stddef.h>
 
 typedef struct {
     float x, y, z;
@@ -29,7 +30,7 @@ typedef struct {
 } ScreenEdge;
 
 typedef struct {
-    Vertice *v0, *v1, *v2;
+    size_t v0, v1, v2;
     Vec3 normal;
 } Face;
 

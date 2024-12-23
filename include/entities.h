@@ -1,6 +1,7 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 #include "math_utils.h"
+#include "camera.h"
 
 typedef struct {
     Vertice *vertices;
@@ -36,6 +37,6 @@ void ScaleObject3D(Object3D *obj, Vec3 scale);
 void TransformObject3D(Object3D *obj);
 
 void RenderMesh(Mesh *mesh);
-void RenderMeshWireframe(Mesh *mesh);
+void RenderMeshWireframe(Mesh *mesh, Camera cam);
 
 #endif
