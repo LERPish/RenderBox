@@ -9,6 +9,6 @@ extern float zbuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 
 void RenderFramebuffer(App *app);
 void ClearFramebuffer(unsigned int color);
-void DrawPixel(int x, int y, float z, unsigned int color);
+int DrawPixel(int x, int y, float z, unsigned int color);
 
 #endif

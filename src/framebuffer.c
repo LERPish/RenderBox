@@ -33,11 +33,13 @@ void ClearFramebuffer(unsigned int color) {
     }
 }
 
-void DrawPixel(int x, int y, float z, unsigned int color) {
+int DrawPixel(int x, int y, float z, unsigned int color) {
     if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
         if (zbuffer[y][x] > z) {
             framebuffer[y][x] = color;
             zbuffer[y][x] = z;
         }
+        return 1;
     }
+    return 0;
 }
