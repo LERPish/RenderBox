@@ -14,6 +14,7 @@ typedef struct {
 
 typedef struct {
     Vec3 pos;
+    Vec3 normal;
 } Vertice;
 
 typedef struct {

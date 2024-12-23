@@ -63,15 +63,31 @@ void DestroyMesh(Mesh *mesh) {
     }
 }
 
-void AddVertsToMesh(Mesh *mesh, Vec3 *verts) {
-    memcpy(mesh->vertices, verts, sizeof(Vec3) * mesh->vertex_count);
+void AddVertsToMesh(Mesh *mesh, Vec3 vert) {
+    mesh->vertex_count += 1;
+    mesh->vertices = realloc(mesh->vertices, mesh->vertex_count * sizeof(Vertice));
+    mesh->vertices[mesh->vertex_count - 1] = (Vertice){.pos = vert, .normal = {0.0f, 0.0f, 0.0f}}; 
 }
 
 void AddEdgesToMesh(Mesh *mesh, Edge *edges) {
     memcpy(mesh->edges, edges, sizeof(Edge) * mesh->vertex_count);
 }
 
-void AddFacesToMesh(Mesh *mesh, Face *faces);
+void AddFacesToMesh(Mesh *mesh, size_t v0, size_t v1, size_t v2) {
+    mesh->face_count += 1;
+    mesh->faces = realloc(mesh->faces, mesh->face_count * sizeof(Face));
+    Vec3 normal = CalculateFaceNormal(mesh->vertices[v0].pos,
+                                      mesh->vertices[v1].pos,
+                                      mesh->vertices[v2].pos);
+    mesh->faces[mesh->face_count - 1] = (Face){ v0, v1, v2, normal };
+}
+
+Vec3 CalculateFaceNormal(Vec3 v0, Vec3 v1, Vec3 v2) {
+    Vec3 edge1 = Vec3Sub(v1, v2);
+    Vec3 edge2 = Vec3Sub(v2, v0);
+    Vec3 ret = Vec3Normalize(Vec3Cross(edge1, edge2));
+    return ret;
+}
 
 Object3D *CreateObject3D(Mesh *mesh, Vec3 position, Vec3 eulerRotation, Vec3 scale) {
     Object3D *obj = malloc(sizeof(Object3D));
@@ -94,6 +110,7 @@ Object3D *CreateObject3D(Mesh *mesh, Vec3 position, Vec3 eulerRotation, Vec3 sca
         obj->transformedMesh->faces[i].v0 = mesh->faces[i].v0;
         obj->transformedMesh->faces[i].v1 = mesh->faces[i].v1;
         obj->transformedMesh->faces[i].v2 = mesh->faces[i].v2;
+        obj->transformedMesh->faces[i].normal = mesh->faces[i].normal;
     }
 
     obj->position = position;
@@ -137,11 +154,36 @@ void TransformObject3D(Object3D *obj) {
 
         obj->transformedMesh->vertices[i].pos = translatedVertex;
     }
+
+    for (size_t i = 0; i < obj->mesh->face_count; i++) {
+        Face *face = &obj->transformedMesh->faces[i];
+
+        Vec3 v0 = obj->transformedMesh->vertices[face->v0].pos;
+        Vec3 v1 = obj->transformedMesh->vertices[face->v1].pos;
+        Vec3 v2 = obj->transformedMesh->vertices[face->v2].pos;
+
+        Vec3 normal = CalculateFaceNormal(v0, v1, v2);
+
+        face->normal = normal;
+    }
 }
 
 void RenderMesh(Mesh *mesh);
 void RenderMeshWireframe(Mesh *mesh, Camera cam) {
     for (size_t i = 0; i < mesh->face_count; i++) {
+        Face *face = &mesh->faces[i];
+        Vec3 vf0 = mesh->vertices[face->v0].pos;
+        Vec3 viewDirection = Vec3Sub(cam.pos, mesh->vertices[face->v0].pos);
+        printf("camera pos: (%f,%f,%f)\nv0 pos: (%f,%f,%f)\nview direction: (%f,%f,%f)\n", cam.pos.x, cam.pos.y, cam.pos.z,
+                                                                                           vf0.x, vf0.y, vf0.z,
+                                                                                           viewDirection.x, viewDirection.y, viewDirection.z);
+
+        float dot = Vec3DotProduct(face->normal, viewDirection);
+        printf("dot: %f\n", dot);
+
+        if (dot <= 0.0f)
+            continue;
+
         Vec2 v0 = ProjectVert(mesh->vertices[mesh->faces[i].v0].pos, cam);
         Vec2 v1 = ProjectVert(mesh->vertices[mesh->faces[i].v1].pos, cam);
         Vec2 v2 = ProjectVert(mesh->vertices[mesh->faces[i].v2].pos, cam);

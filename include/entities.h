@@ -23,9 +23,11 @@ typedef struct {
 Mesh *CreateMesh(size_t vertex_count, size_t edge_count, size_t face_count);
 void DestroyMesh(Mesh *mesh);
 
-void AddVertsToMesh(Mesh *mesh, Vec3 *verts);
+void AddVertsToMesh(Mesh *mesh, Vec3 verts);
 void AddEdgesToMesh(Mesh *mesh, Edge *edges);
-void AddFacesToMesh(Mesh *mesh, Face *faces);
+void AddFacesToMesh(Mesh *mesh, size_t v0, size_t v1, size_t v2);
+
+Vec3 CalculateFaceNormal(Vec3 v0, Vec3 v1, Vec3 v2);
 
 Object3D *CreateObject3D(Mesh *mesh, Vec3 position, Vec3 eulerRotation, Vec3 scale);
 void DestroyObject3D(Object3D *obj);

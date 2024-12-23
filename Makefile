@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -g
 LDFLAGS = -lSDL2 -lm
-SRC = src/main.c src/init.c src/input.c src/framebuffer.c src/math_utils.c src/camera.c src/entities.c
+SRC = src/main.c src/init.c src/input.c src/framebuffer.c src/math_utils.c src/camera.c src/entities.c src/obj_parser.c
 OBJ = $(SRC:src/%.c=build/%.o)
 OUT = build/renderer
 

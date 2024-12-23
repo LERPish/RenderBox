@@ -59,7 +59,7 @@ void line(ScreenEdge e, unsigned int color) {
     while (1) {
         int ret = DrawPixel(x0, y0, 0.5f, color);
 
-        if((x0 == x1 && y0 == y1) /*|| ret == 0*/) break;
+        if((x0 == x1 && y0 == y1) || ret == 0) break;
 
         int e2 = 2 * err;
         if (e2 > -dy) {
