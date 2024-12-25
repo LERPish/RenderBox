@@ -1,7 +1,11 @@
 #include "framebuffer.h"
+#include "camera.h"
 #include "defs.h"
+#include "math_utils.h"
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <math.h>
+#include <stdlib.h>
 
 unsigned int framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
 float zbuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -35,7 +39,7 @@ void ClearFramebuffer(unsigned int color) {
 
 int DrawPixel(int x, int y, float z, unsigned int color) {
     if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
-        if (zbuffer[y][x] > z) {
+        if (zbuffer[y][x] >= z) {
             framebuffer[y][x] = color;
             zbuffer[y][x] = z;
         }
@@ -44,11 +48,11 @@ int DrawPixel(int x, int y, float z, unsigned int color) {
     return 0;
 }
 
-void line(ScreenEdge e, unsigned int color) {
-    int x0 = e.v0.x;
-    int y0 = e.v0.y;
-    int x1 = e.v1.x;
-    int y1 = e.v1.y;
+void line(Vec2 v0, Vec2 v1, unsigned int color) {
+    int x0 = v0.x;
+    int y0 = v0.y;
+    int x1 = v1.x;
+    int y1 = v1.y;
 
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
@@ -57,7 +61,7 @@ void line(ScreenEdge e, unsigned int color) {
     int err = dx - dy;
 
     while (1) {
-        int ret = DrawPixel(x0, y0, 0.5f, color);
+        int ret = DrawPixel(x0, y0, -10.0f, color);
 
         if((x0 == x1 && y0 == y1) || ret == 0) break;
 
@@ -69,6 +73,58 @@ void line(ScreenEdge e, unsigned int color) {
         if (e2 < dx) {
             err += dx;
             y0 += sy;
+        }
+    }
+}
+
+int ComputeBarycentric(Vec2 v0, Vec2 v1, Vec2 v2, int x, int y, float *lambda1, float *lambda2, float *lambda3) {
+    // Full triangle area
+    float aTri = (v1.x - v0.x) * (v2.y - v0.y) - (v2.x - v0.x) * (v1.y - v0.y);
+    if (fabs(aTri) < 1e-6) return 0; // Degenerate triangle
+
+    // Sub-triangle areas
+    float a1 = (v1.x - x) * (v2.y - y) - (v2.x - x) * (v1.y - y);
+    float a2 = (v2.x - x) * (v0.y - y) - (v0.x - x) * (v2.y - y);
+    float a3 = (v0.x - x) * (v1.y - y) - (v1.x - x) * (v0.y - y);
+
+    // Normalize
+    *lambda1 = a1 / aTri;
+    *lambda2 = a2 / aTri;
+    *lambda3 = a3 / aTri;
+
+    // Check if inside the triangle
+    return (*lambda1 >= 0 && *lambda2 >= 0 && *lambda3 >= 0 && 
+            fabs(*lambda1 + *lambda2 + *lambda3 - 1.0f) < 1e-6);
+}
+
+
+
+void RasterizeTriangle (Vec3 vv0, Vec3 vv1, Vec3 vv2, Camera cam, unsigned int color) {
+    Vec2 v0 = ProjectVert(vv0, cam);
+    Vec2 v1 = ProjectVert(vv1, cam);
+    Vec2 v2 = ProjectVert(vv2, cam);
+
+    int minX = floorf(fminf(v0.x, fminf(v1.x, v2.x)));
+    int maxX = ceilf(fmaxf(v0.x, fmaxf(v1.x, v2.x)));
+    int minY = floorf(fminf(v0.y, fminf(v1.y, v2.y)));
+    int maxY = ceilf(fmaxf(v0.y, fmaxf(v1.y, v2.y)));
+
+    minX = fmax(minX, 0);
+    maxX = fmin(maxX, SCREEN_WIDTH - 1);
+    minY = fmax(minY, 0);
+    maxY = fmin(maxY, SCREEN_HEIGHT - 1);
+
+    //printf("Triangle Bounding Box: minX=%d, maxX=%d, minY=%d, maxY=%d\n", minX, maxX, minY, maxY);
+    
+    for (int y = minY; y <= maxY; y++) {
+        for (int x = minX; x <= maxX; x++) {
+            float lambda1, lambda2, lambda3;
+            if (ComputeBarycentric(v0,v1,v2,x,y,&lambda1,&lambda2,&lambda3)){
+                //printf("%f, %f, %f\n", lambda1, lambda2, lambda3);
+                float depth = lambda1 * vv0.z + lambda2 * vv1.z + lambda3 * vv2.z;
+
+                DrawPixel(x, y, depth, color);
+            }
         }
     }
 }

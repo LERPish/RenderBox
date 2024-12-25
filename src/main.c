@@ -14,32 +14,9 @@
 #include "camera.h"
 #include "obj_parser.h"
 
-void line(ScreenEdge e, unsigned int color);
-
 Camera cam = { {0.0f,0.0f,-2.0f}, 700.0f };
 
 Vec3 baseScale = {1,1,1};
-
-
-/*Edge cubeE[] = { { {0,0,0}, {1,0,0} },
-                { {1,0,0}, {1,0,1} },
-                { {1,0,1}, {0,0,1} },
-                { {0,0,1}, {0,0,0} },
-                { {0,0,0}, {1,0,1} },
-                { {0,0,0}, {0,1,0} },
-                { {1,0,0}, {1,1,0} },
-                { {1,0,1}, {1,1,1} },
-                { {0,0,1}, {0,1,1} },
-                { {0,1,0}, {1,1,0} },
-                { {1,1,0}, {1,1,1} },
-                { {1,1,1}, {0,1,1} },
-                { {0,1,1}, {0,1,0} },
-                { {0,0,0}, {1,1,0} },
-                { {0,0,1}, {0,1,0} },
-                { {0,1,0}, {1,1,1} },
-                { {0,0,1}, {1,1,1} },
-                { {1,0,0}, {1,1,1} }
-};*/
 
 Vertice cubeV[] = {
     (Vertice){.pos = {-0.5f, -0.5f, -0.5f}},
@@ -78,7 +55,7 @@ Face cubeF[] = {
 int main(int argc, char *argv[]) {
     initSDL();
 
-    Mesh *cMesh = LoadOBJ("./assets/sphere.obj");
+    Mesh *cMesh = LoadOBJ("./assets/Goobi.obj");
     fprintf(stdout, "Mesh Created\n");
     Object3D *obj = CreateObject3D(
         cMesh,
@@ -90,9 +67,9 @@ int main(int argc, char *argv[]) {
     int small = 0;
 
     while (1) {
-        printf("doInput\n");
+        //printf("doInput\n");
         char key = doInput();
-        printf("got my key\n");
+        //printf("got my key\n");
 
         if (key) {
             //printf("%c\n", key);
@@ -121,13 +98,13 @@ int main(int argc, char *argv[]) {
         }
 
         //ClearFramebuffer(0x000000FF);
-        printf("Analyzed key\n");
+        //printf("Analyzed key\n");
         ClearFramebuffer(0x000000FF);
-        printf("Cleared Buffer\n");
+        //printf("Cleared Buffer\n");
 
-        RotateObject3D(obj, (Vec3){0,0.001f,0});
+        RotateObject3D(obj, (Vec3){0,0.01f,0});
 
-        if (obj->scale.y >= 0.06f && small == 0)
+        /*if (obj->scale.y >= 0.06f && small == 0)
             ScaleObject3D(obj, (Vec3){1,0.99f,1});
         else {
             ScaleObject3D(obj, (Vec3){1,1.01f,1});
@@ -135,11 +112,12 @@ int main(int argc, char *argv[]) {
                 small = 0;
             else
                 small = 1;
-        }
+        }*/
 
         TransformObject3D(obj);
 
-        RenderMeshWireframe(obj->transformedMesh, cam);
+        RenderMesh(obj->transformedMesh, cam);
+        //RenderMeshWireframe(obj->transformedMesh, cam);
 
         RenderFramebuffer(&app);
     }

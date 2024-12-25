@@ -38,7 +38,7 @@ void ScaleObject3D(Object3D *obj, Vec3 scale);
 
 void TransformObject3D(Object3D *obj);
 
-void RenderMesh(Mesh *mesh);
+void RenderMesh(Mesh *mesh, Camera cam);
 void RenderMeshWireframe(Mesh *mesh, Camera cam);
 
 #endif

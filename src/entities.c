@@ -3,6 +3,7 @@
 #include "entities.h"
 #include "camera.h"
 #include "framebuffer.h"
+#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -168,18 +169,46 @@ void TransformObject3D(Object3D *obj) {
     }
 }
 
-void RenderMesh(Mesh *mesh);
+void RenderMesh(Mesh *mesh, Camera cam) {
+    for (size_t i = 0; i < mesh->face_count; i++) {
+        Face *face = &mesh->faces[i];
+        Vertice *v0 = &mesh->vertices[face->v0];
+        Vertice *v1 = &mesh->vertices[face->v1];
+        Vertice *v2 = &mesh->vertices[face->v2];
+
+        Vec3 vf0 = mesh->vertices[face->v0].pos;
+        Vec3 viewDirection = Vec3Sub(cam.pos, v0->pos);
+
+        float dot = Vec3DotProduct(face->normal, viewDirection);
+
+        if (dot <= 0.0f)
+            continue;
+
+        float nDot = fmaxf(0, Vec3DotProduct(face->normal, Vec3Normalize((Vec3){ 1, 1, -1 })));
+        Color color = CreateColorHex(0xFFFFFFFF);
+
+        color.r *= nDot;
+        color.g *= nDot;
+        color.b *= nDot;
+
+        color.r = fminf(fmaxf(color.r, 0.0f), 1.0f);
+        color.g = fminf(fmaxf(color.g, 0.0f), 1.0f);
+        color.b = fminf(fmaxf(color.b, 0.0f), 1.0f);
+        color.a = 0.1f;
+
+        RGBToHex(&color);
+
+        RasterizeTriangle(v0->pos, v1->pos, v2->pos, cam, color.hex);
+    }
+}
+
 void RenderMeshWireframe(Mesh *mesh, Camera cam) {
     for (size_t i = 0; i < mesh->face_count; i++) {
         Face *face = &mesh->faces[i];
         Vec3 vf0 = mesh->vertices[face->v0].pos;
         Vec3 viewDirection = Vec3Sub(cam.pos, mesh->vertices[face->v0].pos);
-        printf("camera pos: (%f,%f,%f)\nv0 pos: (%f,%f,%f)\nview direction: (%f,%f,%f)\n", cam.pos.x, cam.pos.y, cam.pos.z,
-                                                                                           vf0.x, vf0.y, vf0.z,
-                                                                                           viewDirection.x, viewDirection.y, viewDirection.z);
 
         float dot = Vec3DotProduct(face->normal, viewDirection);
-        printf("dot: %f\n", dot);
 
         if (dot <= 0.0f)
             continue;
@@ -188,12 +217,8 @@ void RenderMeshWireframe(Mesh *mesh, Camera cam) {
         Vec2 v1 = ProjectVert(mesh->vertices[mesh->faces[i].v1].pos, cam);
         Vec2 v2 = ProjectVert(mesh->vertices[mesh->faces[i].v2].pos, cam);
 
-        ScreenEdge e0 = {v0,v1};
-        ScreenEdge e1 = {v1,v2};
-        ScreenEdge e2 = {v0,v2};
-
-        line(e0, 0xFFFFFFFF);
-        line(e1, 0xFFFFFFFF);
-        line(e2, 0xFFFFFFFF);
+        line(v0, v1, 0x00000000);
+        line(v1, v2, 0x00000000);
+        line(v2, v0, 0x00000000);
     }
 }

@@ -95,3 +95,49 @@ Vec3 ComputeNormal(Vec3 *v0, Vec3 *v1, Vec3 *v2) {
     Vec3 normal = Vec3Cross(edge1, edge2);
     return Vec3Normalize(normal);
 }
+
+Vec2 Vec2Sub(Vec2 a, Vec2 b) {
+    Vec2 ret = (Vec2){ a.x - b.x, a.y - b.y };
+    return ret;
+}
+
+float Vec2DotProduct(Vec2 a, Vec2 b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+void RGBToHex(Color *color) {
+    unsigned int red = (unsigned int)(color->r * 255.0f) & 0xFF;
+    unsigned int green = (unsigned int)(color->g * 255.0f) & 0xFF;
+    unsigned int blue = (unsigned int)(color->b * 255.0f) & 0xFF;
+    unsigned int alpha = (unsigned int)(color->a * 255.0f) & 0xFF;
+
+    unsigned int hex = (alpha << 24) | (red << 16) | (green << 8) | blue;
+
+    color->hex = hex;
+}
+
+void HexToRGB(Color *color) {
+    unsigned int hex = color->hex;
+    color->r = ((hex >> 16) & 0xFF) / 255.0f;
+    color->g = ((hex >> 8) & 0xFF) / 255.0f;
+    color->b = (hex & 0xFF) / 255.0f;
+    color->a = ((hex >> 24) & 0xFF) / 255.0f;
+}
+
+Color CreateColorRGB(float r, float g, float b, float a) {
+    Color color;
+    color.r = r;
+    color.g = g;
+    color.b = b;
+    color.a = a;
+    RGBToHex(&color);
+    return color;
+}
+
+Color CreateColorHex(unsigned int hex) {
+    Color color;
+    color.hex = hex;
+    HexToRGB(&color);
+    return color;
+}
+

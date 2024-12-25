@@ -13,13 +13,19 @@ typedef struct {
 } Vec2;
 
 typedef struct {
+    float r, g, b, a;
+    unsigned int hex;
+} Color;
+
+typedef struct {
     Vec3 pos;
     Vec3 normal;
+    Color color;
 } Vertice;
 
 typedef struct {
     Vec2 pos;
-    unsigned int color;
+    Color color;
 } ScreenVert;
 
 typedef struct {
@@ -66,5 +72,17 @@ Vec3 Vec3Sub(Vec3 a, Vec3 b);
 Vec3 Vec3Mult(Vec3 a, Vec3 b);
 
 Vec3 ComputeNormal(Vec3 *v0, Vec3 *v1, Vec3 *v2);
+
+Vec2 Vec2Sub(Vec2 a, Vec2 b);
+
+float Vec2DotProduct(Vec2 a, Vec2 b);
+
+void RGBToHex(Color *color);
+
+void HexToRGB(Color *color);
+
+Color CreateColorRGB(float r, float g, float b, float a);
+
+Color CreateColorHex(unsigned int hex);
 
 #endif

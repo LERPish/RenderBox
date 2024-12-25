@@ -50,7 +50,6 @@ Mesh *LoadOBJ(const char *filename) {
             } else if (strchr(line, '/')) {
                 int vn1, vn2, vn3;
                 sscanf(line, "f %d/%*d/%d %d/%*d/%d %d/%*d/%d", &v1, &vn1, &v2, &vn2, &v3, &vn3);
-                printf("top bro\n");
 
                 if (v1 >= 0 && (size_t)v1 < mesh->vertex_count)
                     mesh->vertices[v1].normal = normals[vn1];
