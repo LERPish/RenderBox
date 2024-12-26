@@ -176,7 +176,6 @@ void RenderMesh(Mesh *mesh, Camera cam) {
         Vertice *v1 = &mesh->vertices[face->v1];
         Vertice *v2 = &mesh->vertices[face->v2];
 
-        Vec3 vf0 = mesh->vertices[face->v0].pos;
         Vec3 viewDirection = Vec3Sub(cam.pos, v0->pos);
 
         float dot = Vec3DotProduct(face->normal, viewDirection);
@@ -205,7 +204,6 @@ void RenderMesh(Mesh *mesh, Camera cam) {
 void RenderMeshWireframe(Mesh *mesh, Camera cam) {
     for (size_t i = 0; i < mesh->face_count; i++) {
         Face *face = &mesh->faces[i];
-        Vec3 vf0 = mesh->vertices[face->v0].pos;
         Vec3 viewDirection = Vec3Sub(cam.pos, mesh->vertices[face->v0].pos);
 
         float dot = Vec3DotProduct(face->normal, viewDirection);
@@ -213,9 +211,12 @@ void RenderMeshWireframe(Mesh *mesh, Camera cam) {
         if (dot <= 0.0f)
             continue;
 
-        Vec2 v0 = ProjectVert(mesh->vertices[mesh->faces[i].v0].pos, cam);
-        Vec2 v1 = ProjectVert(mesh->vertices[mesh->faces[i].v1].pos, cam);
-        Vec2 v2 = ProjectVert(mesh->vertices[mesh->faces[i].v2].pos, cam);
+        Vec3 vv0 = ProjectVert(mesh->vertices[mesh->faces[i].v0].pos, &cam);
+        Vec3 vv1 = ProjectVert(mesh->vertices[mesh->faces[i].v1].pos, &cam);
+        Vec3 vv2 = ProjectVert(mesh->vertices[mesh->faces[i].v2].pos, &cam);
+        Vec2 v0 = {vv0.x, vv0.y};
+        Vec2 v1 = {vv1.x, vv1.y};
+        Vec2 v2 = {vv2.x, vv2.y};
 
         line(v0, v1, 0x00000000);
         line(v1, v2, 0x00000000);

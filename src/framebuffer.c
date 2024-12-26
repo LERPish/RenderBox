@@ -77,7 +77,7 @@ void line(Vec2 v0, Vec2 v1, unsigned int color) {
     }
 }
 
-int ComputeBarycentric(Vec2 v0, Vec2 v1, Vec2 v2, int x, int y, float *lambda1, float *lambda2, float *lambda3) {
+int ComputeBarycentric(Vec3 v0, Vec3 v1, Vec3 v2, int x, int y, float *lambda1, float *lambda2, float *lambda3) {
     // Full triangle area
     float aTri = (v1.x - v0.x) * (v2.y - v0.y) - (v2.x - v0.x) * (v1.y - v0.y);
     if (fabs(aTri) < 1e-6) return 0; // Degenerate triangle
@@ -99,10 +99,10 @@ int ComputeBarycentric(Vec2 v0, Vec2 v1, Vec2 v2, int x, int y, float *lambda1, 
 
 
 
-void RasterizeTriangle (Vec3 vv0, Vec3 vv1, Vec3 vv2, Camera cam, unsigned int color) {
-    Vec2 v0 = ProjectVert(vv0, cam);
-    Vec2 v1 = ProjectVert(vv1, cam);
-    Vec2 v2 = ProjectVert(vv2, cam);
+void RasterizeTriangle (Vec3 v0, Vec3 v1, Vec3 v2, Camera cam, unsigned int color) {
+    v0 = ProjectVert(v0, &cam);
+    v1 = ProjectVert(v1, &cam);
+    v2 = ProjectVert(v2, &cam);
 
     int minX = floorf(fminf(v0.x, fminf(v1.x, v2.x)));
     int maxX = ceilf(fmaxf(v0.x, fmaxf(v1.x, v2.x)));
@@ -121,7 +121,8 @@ void RasterizeTriangle (Vec3 vv0, Vec3 vv1, Vec3 vv2, Camera cam, unsigned int c
             float lambda1, lambda2, lambda3;
             if (ComputeBarycentric(v0,v1,v2,x,y,&lambda1,&lambda2,&lambda3)){
                 //printf("%f, %f, %f\n", lambda1, lambda2, lambda3);
-                float depth = lambda1 * vv0.z + lambda2 * vv1.z + lambda3 * vv2.z;
+                float depth = lambda1 * v0.z + lambda2 * v1.z + lambda3 * v2.z;
+                //printf("depth: %f\n", depth);
 
                 DrawPixel(x, y, depth, color);
             }

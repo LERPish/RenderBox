@@ -5,6 +5,10 @@
 #include <stddef.h>
 
 typedef struct {
+    float x, y, z, w;
+} Vec4;
+
+typedef struct {
     float x, y, z;
 } Vec3;
 
@@ -56,6 +60,14 @@ Matrice3x3 RzAxis(float theta);
 Matrice3x3 MultiplyMat3(Matrice3x3 a, Matrice3x3 b);
 
 Vec3 MultiplyMat3Vec3(Matrice3x3 mat, Vec3 vec);
+
+Vec4 MultiplyMat4Vec4(Matrice4x4 mat, Vec4 vec);
+
+Matrice4x4 MatPointAt(Vec3 pos, Vec3 target, Vec3 up);
+
+Matrice4x4 MatQuickInverse(Matrice4x4 m);
+
+Matrice4x4 MatTranspose(Matrice4x4 mat);
 
 float Vec3DotProduct(Vec3 a, Vec3 b);
 
