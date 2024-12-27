@@ -104,6 +104,10 @@ void RasterizeTriangle (Vec3 v0, Vec3 v1, Vec3 v2, Camera cam, unsigned int colo
     v1 = ProjectVert(v1, &cam);
     v2 = ProjectVert(v2, &cam);
 
+    if (v0.x == -1000 || v1.x == -1000 || v2.x == -1000) {
+        return;
+    }
+
     int minX = floorf(fminf(v0.x, fminf(v1.x, v2.x)));
     int maxX = ceilf(fmaxf(v0.x, fmaxf(v1.x, v2.x)));
     int minY = floorf(fminf(v0.y, fminf(v1.y, v2.y)));

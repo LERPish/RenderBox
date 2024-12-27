@@ -63,7 +63,7 @@ Vec3 MultiplyMat3Vec3(Matrice3x3 mat, Vec3 vec);
 
 Vec4 MultiplyMat4Vec4(Matrice4x4 mat, Vec4 vec);
 
-Matrice4x4 MatPointAt(Vec3 pos, Vec3 target, Vec3 up);
+Matrice4x4 MatPointAt(Vec3 newForward, Vec3 newRight, Vec3 newUp, Vec3 pos);
 
 Matrice4x4 MatQuickInverse(Matrice4x4 m);
 

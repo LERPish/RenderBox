@@ -3,7 +3,6 @@
 #include "camera.h"
 #include <SDL2/SDL_video.h>
 
-void doInput(Camera *cam, SDL_Window *window); 
-void lockMouse(SDL_Window *window); 
+void doInput(Camera *cam); 
 
 #endif

@@ -9,32 +9,38 @@ void UpdateCameraVectors(Camera *cam) {
     float yaw = cam->rotationEuler.y * (M_PI / 180.0f);
     float roll = cam->rotationEuler.z * (M_PI / 180.0f);
 
-    float cp = cosf(pitch), sp = sinf(pitch);
-    float cy = cosf(yaw), sy = sinf(yaw);
-    float cr = cosf(roll), sr = sinf(roll);
+    // Generate rotation matrices for each axis
+    Matrice3x3 rotationPitch = RxAxis(pitch);
+    Matrice3x3 rotationYaw = RyAxis(yaw);
+    Matrice3x3 rotationRoll = RzAxis(roll);
 
-    Matrice3x3 rotation = {
-        {
-            { cy * cr + sy * sp * sr, cr * sp * sy - cy * sr, cp * sy }, 
-            { cp * sr, cp * cr, -sp },                                  
-            { cy * sp * sr - cr * sy, sr * sy + cy * cr * sp, cy * cp } 
-        }
-    };
+    // Combine matrices in the order: Roll -> Pitch -> Yaw
+    Matrice3x3 rotation = MultiplyMat3(rotationYaw, MultiplyMat3(rotationPitch, rotationRoll));
 
     cam->right = Vec3Normalize((Vec3){ rotation.M[0][0], rotation.M[0][1], rotation.M[0][2] });
     cam->up = Vec3Normalize((Vec3){ rotation.M[1][0], rotation.M[1][1], rotation.M[1][2] });
     cam->forward = Vec3Normalize((Vec3){ rotation.M[2][0], rotation.M[2][1], rotation.M[2][2] });
+
+    printf("Rotation Matrix:\n");
+    for (int i = 0; i < 3; i++) {
+        printf("[%f, %f, %f]\n", rotation.M[i][0], rotation.M[i][1], rotation.M[i][2]);
+    }
+
+    printf("Right: (%f, %f, %f)\n", cam->right.x, cam->right.y, cam->right.z);
+    printf("Up: (%f, %f, %f)\n", cam->up.x, cam->up.y, cam->up.z);
+    printf("Forward: (%f, %f, %f)\n", cam->forward.x, cam->forward.y, cam->forward.z);
+    printf("\n");
 }
 
 
 void GetViewMatrix(Camera *cam) {
-    Vec3 up = Vec3Normalize(cam->up);
-    Vec3 forward = Vec3Normalize(cam->forward);
-    Vec3 right = Vec3Normalize(cam->right);
+    Vec3 up = cam->up;
+    Vec3 forward = cam->forward;
+    Vec3 right = cam->right;
     Vec3 pos = cam->pos;
     Vec3 target = Vec3Add(pos, forward);
 
-    Matrice4x4 viewMat = MatPointAt(pos, target, up);
+    Matrice4x4 viewMat = MatPointAt(forward, right, up, pos);
     viewMat = MatQuickInverse(viewMat);
 
     /*printf("View Matrix:\n");
@@ -51,6 +57,7 @@ void GetViewMatrix(Camera *cam) {
     printf("\n");*/
 
     cam->viewMatrix = viewMat;
+    cam->isDirty = 0;
 }
 
 void GetProjectionMatrix(Camera *cam) {
@@ -94,7 +101,7 @@ Vec3 ProjectVert(Vec3 pos3d, Camera *cam) {
     //printf("clip space: (%f,%f,%f,%f)\n", clip_space.x, clip_space.y, clip_space.z, clip_space.w);
     if (clip_space.w <= 0) {
         //printf("oh no\n");
-        return (Vec3){0,0,0};
+        return (Vec3){-1000,0,0};
     }
 
     Vec3 ndc = (Vec3){

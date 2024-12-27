@@ -1,12 +1,12 @@
 # Compiler and flags
-CC = gcc
-CFLAGS = -Isrc -Iinclude `sdl2-config --cflags` -Wall -Wextra -g
-LDFLAGS = `sdl2-config --libs` -lm
-OUTPUT = build/renderer
+CC = x86_64-w64-mingw32-gcc
+CFLAGS = -Isrc -Iinclude -I/mnt/c/SDL2/SDL2-2.30.10/x86_64-w64-mingw32/include
+LDFLAGS = -L/mnt/c/SDL2/SDL2-2.30.10/x86_64-w64-mingw32/lib -lmingw32 -lSDL2main -lSDL2
+OUTPUT = build/Renderer.exe
 
 # Directories
 SRC_DIR = src
-OBJ_DIR = build/linux
+OBJ_DIR = build/windows
 INCLUDE_DIR = include
 
 # Source files and object files

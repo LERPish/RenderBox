@@ -1,5 +1,6 @@
 #include "math_utils.h"
 #include <math.h>
+#include <stdio.h>
 
 Matrice3x3 RxAxis(float theta) {
     float c = cosf(theta);
@@ -75,19 +76,15 @@ Matrice4x4 MatQuickInverse(Matrice4x4 m) {
 }
 
 
-Matrice4x4 MatPointAt(Vec3 pos, Vec3 target, Vec3 up) {
-    Vec3 newForward = Vec3Sub(target, pos);
-    newForward = Vec3Normalize(newForward);
-
-    Vec3 newRight = Vec3Cross(up, newForward);
-    newRight = Vec3Normalize(newRight);
-
-    Vec3 newUp = Vec3Cross(newForward, newRight);
+Matrice4x4 MatPointAt(Vec3 newForward, Vec3 newRight, Vec3 newUp, Vec3 pos) {
+    printf("newRight: %f,%f,%f\n", newRight.x,newRight.y,newRight.z);
+    printf("newUp: %f,%f,%f\n", newUp.x,newUp.y,newUp.z);
+    printf("newForward: %f,%f,%f\n", newForward.x,newForward.y,newForward.z);
 
     Matrice4x4 mat = {.M = {
-        { newRight.x, newUp.x, -newForward.x, pos.x },
-        { newRight.y, newUp.y, -newForward.y, pos.y },
-        { newRight.z, newUp.z, -newForward.z, pos.z },
+        { newRight.x, newRight.y, newRight.z, pos.x },
+        { newUp.x, newUp.y, newUp.z, pos.y },
+        { -newForward.x, -newForward.y, -newForward.z, pos.z },
         { 0.0f, 0.0f, 0.0f, 1.0f }
     }};
 
@@ -121,10 +118,10 @@ Vec3 Vec3Cross(Vec3 a, Vec3 b) {
 }
 
 float Vec3Magnitude(Vec3 vec) {
-    float v0 = powf(vec.x, 2);
-    float v1 = powf(vec.y, 2);
-    float v2 = powf(vec.z, 2);
-    return sqrtf(v0 + v1 + v2);
+    float v0 = vec.x;
+    float v1 = vec.y;
+    float v2 = vec.z;
+    return sqrtf(v0*v0 + v1*v1 + v2*v2);
 }
 
 Vec3 Vec3Normalize(Vec3 vec) {
